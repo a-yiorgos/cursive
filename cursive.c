@@ -60,6 +60,9 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 #include "cursive.h"
 
 char *buffer[6];	/* memory buffers to build up line in */
@@ -72,8 +75,10 @@ int taillen = 1;	/* how long the tails on ends of words should be */
 char firstletter;	/* is this the first letter on the line? */
 char message[256] = "";	/* message to print */
 
-char *malloc();
+void prline();
+void tailer();
 
+void
 main(argc,argv)
 int argc;
 char **argv;
@@ -128,7 +133,7 @@ char ch;
 	else
 	{
 		/* Message from standard input */
-		while (gets(message) != NULL)
+		while (fgets(message, 256, stdin) != NULL)
 			prline(message);
 	}
 }
@@ -136,6 +141,7 @@ char ch;
 
 /* Add the given letter to the end of the current line */
 
+void
 place(let)
 struct letter *let;
 {
@@ -198,6 +204,7 @@ char *l;
 }
 
 /* Lengthen the last trailer by n */
+void
 tailer(n)
 int n;
 {
@@ -208,6 +215,7 @@ int j;
 }
 
 /* Handle a line */
+void
 prline(s)
 char *s;
 {
