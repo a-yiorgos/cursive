@@ -1,0 +1,716 @@
+From reynolds%kiwi%ingr.uucp@uunet.UU.NET Wed Nov 25 22:59:11 1987
+Received: from uunet.UU.NET by crim.eecs.umich.edu (3.2/umich-5.1)
+	id AA09911; Wed, 25 Nov 87 22:57:33 EST
+Received: from ingr.UUCP by uunet.UU.NET (5.54/1.14) with UUCP 
+	id AA02257; Wed, 25 Nov 87 22:10:53 EST
+Date: Wed, 25 Nov 87 22:10:53 EST
+From: reynolds%kiwi%ingr.uucp@uunet.UU.NET
+Message-Id: <8711260310.AA02257@uunet.UU.NET>
+To: janc@crim.eecs.umich.edu
+Subject: System V cursive patch
+Status: RO
+
+Under System V, malloc() doesn't like a request to allocate zero
+bytes.  If a blank line is read from stdin, this is what cursive
+tries to do.  The following fix is a Q&D correction that eliminates
+the problem:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*** cursive.c.orig	Wed Nov 25 12:33:31 1987
+--- cursive.c	Wed Nov 25 15:06:03 1987
+***************
+*** 218,223 ****
+--- 218,224 ----
+  	lasttail = -1;
+  	firstletter = 1;
+  	space = 0;
++ 	if( *s == '\0' ) s = " ";	/* Make sure we have SOMETHING */
+  	/* Get some memory to put the output into */
+  	l = strlen(s) * (CHARWIDTH + interspace);
+  	for (i=0;i<6;i++)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+BTW - we're changing our node name.  If you reply to 'kiwi', be sure
+to qualify the path through uunet!ingr, since there is more than one
+kiwi on the net; we're in the process of fixing this...
+
+-------
+
+Tom Reynolds			   voice:  (205) 721-1200 x 303
+Phoenix microsystems, inc.	Old uucp:  ..!uunet!ingr!kiwi!reynolds
+991 Discovery Drive		New uucp:  ..!uunet!ingr!hsvpmi!reynolds
+Huntsville, AL 35806
+
+
+From hyc@boomer.cc.umich.edu Sat Dec  5 04:40:20 1987
+Received: from umix.cc.umich.edu by crim.eecs.umich.edu (3.2/umich-5.1)
+	id AA11514; Sat, 5 Dec 87 04:40:16 EST
+Received: by umix.cc.umich.edu (5.54/umix-2.0)
+	id AA24504; Sat, 5 Dec 87 04:42:03 EST
+Received: by boomer.cc.umich.edu (5.54/ccring-0.1)
+	id AA01242; Sat, 5 Dec 87 09:33:40 UTC
+Date: Sat, 5 Dec 87 09:33:40 UTC
+From: hyc@boomer.cc.umich.edu (Howard Chu)
+Message-Id: <8712050933.AA01242@boomer.cc.umich.edu>
+To: janc@crim.eecs.umich.edu
+Subject: Patches to cursive!
+Status: R
+
+Newsgroups: comp.sources.bugs
+Subject: Patches to cursive (from comp.sources.games)
+Expires: 
+References: 
+Sender: 
+Reply-To: hyc@umix.cc.umich.edu (Howard Chu)
+UUCP-Path: {uunet,rutgers}!umix!hyc
+Followup-To: 
+Distribution: world
+Organization: University of Michigan Computing Center, Ann Arbor
+Keywords: 
+
+I just unpacked this little gem tonight, and started messing around...
+Some of the characters looked a little odd, and I changed them to what
+I consider a smoother appearance... See what you think...
+
+Oh yeah, I also ported this to the C compiler running on our big IBM
+mainframe. Pretty cool, once you get past the eccentricities of MTS...
+	     _    ,                           __
+	    ' )  /                     /     /  ) /
+	     /--/ ____, , , __. __  __/     /    /_  . .
+	    /  (_(_) (_(_/_(_(_/ (_(_(_    (__/ / /_(_/_
+
+	University of Michigan Computing Center, Unix Project
+
+#### feed me to patch! ####
+*** cursive.c.old	Sat Dec  5 09:22:00 1987
+--- cursive.c	Sat Dec  5 09:21:14 1987
+***************
+*** 59,64 ****
+--- 59,73 ----
+   *				<_/
+   */
+  
++ /*
++  * $Log:	cursive.c,v $
++  * Revision 1.2  87/12/05  09:18:09  hyc
++  * Added #ifdef's for MTS CBell, or Bell Labs C in MTS.
++  * (The Michigan Terminal System, our homegrown IBM 370 OS. Funstuff.
++  *  But hey, it was the first 370 OS with a real filesystem...  }-)
++  * 
++  */
++ 
+  #include <stdio.h>
+  #include "cursive.h"
+  
+***************
+*** 215,220 ****
+--- 224,235 ----
+  char *ch;
+  short lcode;
+  
++ #ifdef mts
++ 
++ int mode=&0x040, lnum=0;
++ 
++ 	etoa(s,strlen(s));
++ #endif
+  	lasttail = -1;
+  	firstletter = 1;
+  	space = 0;
+***************
+*** 257,264 ****
+--- 272,284 ----
+  	/* print the line and release the memory */
+  	for (i=0;i<6;i++)
+  	{
++ #ifdef mts
++ 		lcode=(short)c[i];
++ 		mtswrite(buffer[i],&lcode,&mod,&lnum,"SPRINT  ");
++ #else mts
+  		buffer[i][c[i]++] = '\n';
+  		write(1,buffer[i],c[i]);
++ #endif mts
+  		free(buffer[i]);
+  	}
+  }
+*** font.c.old	Sat Dec  5 09:22:18 1987
+--- font.c	Sat Dec  5 09:21:55 1987
+***************
+*** 17,22 ****
+--- 17,30 ----
+   * with the line coming in on line 3.
+   */
+  
++ /*
++  * $Log:	font.c,v $
++  * Revision 1.2  87/12/05  09:19:30  hyc
++  * Cleaned up some of the characters, made them nicer looking.
++  * To me, anyway.
++  * 
++  */
++ 
+  #include "cursive.h"
+  
+  struct letter list[] = {
+***************
+*** 26,32 ****
+  	"",
+  	"",
+  	 "__.",
+! 	"(_/|",
+  	"",
+  	""
+  	},
+--- 34,40 ----
+  	"",
+  	"",
+  	 "__.",
+! 	"(_(",
+  	"",
+  	""
+  	},
+***************
+*** 65,71 ****
+  	"",
+  	    "/",
+  	 "__/",
+! 	"(_/",
+  	"",
+  	""
+  	},
+--- 73,79 ----
+  	"",
+  	    "/",
+  	 "__/",
+! 	"(_(",
+  	"",
+  	""
+  	},
+***************
+*** 78,84 ****
+  	"",
+  	"",
+  	 "_",
+! 	"</",
+  	"",
+  	""
+  	},
+--- 86,92 ----
+  	"",
+  	"",
+  	 "_",
+! 	"(<",
+  	"",
+  	""
+  	},
+***************
+*** 130,136 ****
+  	"",
+  	"",
+  	 "o",
+! 	"<",
+  	"",
+  	""
+  	},
+--- 138,144 ----
+  	"",
+  	"",
+  	 "o",
+! 	"(",
+  	"",
+  	""
+  	},
+***************
+*** 166,179 ****
+  
+  #define LL 11		/* l type 1 */
+  	{ {
+! 	   "_",
+! 	  "//",
+  	 "//",
+! 	"</",
+  	"",
+  	""
+  	},
+! 	{3,2,1,0,0,0},
+  	3,3
+  	},
+  
+--- 174,187 ----
+  
+  #define LL 11		/* l type 1 */
+  	{ {
+! 	"",
+! 	  "/)",
+  	 "//",
+! 	"(/",
+  	"",
+  	""
+  	},
+! 	{0,2,1,0,0,0},
+  	3,3
+  	},
+  
+***************
+*** 181,188 ****
+  	{ {
+  	"",
+  	"",
+! 	 "______",
+! 	"/ / / <",
+  	"",
+  	""
+  	},
+--- 189,196 ----
+  	{ {
+  	"",
+  	"",
+! 	 "____",
+! 	"/) ) )",
+  	"",
+  	""
+  	},
+***************
+*** 194,201 ****
+  	{ {
+  	"",
+  	"",
+! 	 "____",
+! 	"/ / <",
+  	"",
+  	""
+  	},
+--- 202,209 ----
+  	{ {
+  	"",
+  	"",
+! 	 "__",
+! 	"/) )",
+  	"",
+  	""
+  	},
+***************
+*** 273,279 ****
+  	"",
+  	 "_/_",
+  	 "/",
+! 	"<_",
+  	"",
+  	""
+  	},
+--- 281,287 ----
+  	"",
+  	 "_/_",
+  	 "/",
+! 	"(_",
+  	"",
+  	""
+  	},
+***************
+*** 337,348 ****
+  	{ {
+  	"",
+  	"",
+! 	 "__  ,",
+! 	"/ (_/",
+! 	   "/",
+! 	  "'"
+  	 },
+! 	{0,0,1,0,3,2},
+  	3,3
+  	},
+  
+--- 345,356 ----
+  	{ {
+  	"",
+  	"",
+! 	 ", ,",
+! 	"(_/",
+! 	 "/",
+! 	"'"
+  	 },
+! 	{0,0,1,0,1,0},
+  	3,3
+  	},
+  
+***************
+*** 364,370 ****
+  	"",
+  	"",
+  	 "__.",
+! 	"(_/|",
+  	"",
+  	""
+  	},
+--- 372,378 ----
+  	"",
+  	"",
+  	 "__.",
+! 	"(_(",
+  	"",
+  	""
+  	},
+***************
+*** 403,409 ****
+  	"",
+  	    "/",
+  	"___/",
+! 	"(_/",
+  	"",
+  	""
+  	},
+--- 411,417 ----
+  	"",
+  	    "/",
+  	"___/",
+! 	"(_(",
+  	"",
+  	""
+  	},
+***************
+*** 415,422 ****
+  	{ {
+  	"",
+  	"",
+! 	 "/>",
+! 	"(_",
+  	"",
+  	""
+  	},
+--- 423,430 ----
+  	{ {
+  	"",
+  	"",
+! 	 "_",
+! 	"(<",
+  	"",
+  	""
+  	},
+***************
+*** 468,474 ****
+  	"",
+  	"",
+  	 "o",
+! 	"<_",
+  	"",
+  	""
+  	},
+--- 476,482 ----
+  	"",
+  	"",
+  	 "o",
+! 	"(_",
+  	"",
+  	""
+  	},
+***************
+*** 519,526 ****
+  	{ {
+  	"",
+  	"",
+! 	"_______",
+! 	"/ / / <",
+  	"",
+  	""
+  	},
+--- 527,534 ----
+  	{ {
+  	"",
+  	"",
+! 	"_____",
+! 	"/) ) )",
+  	"",
+  	""
+  	},
+***************
+*** 532,539 ****
+  	{ {
+  	"",
+  	"",
+! 	"_____",
+! 	"/ / <",
+  	"",
+  	""
+  	},
+--- 540,547 ----
+  	{ {
+  	"",
+  	"",
+! 	"___",
+! 	"/) )",
+  	"",
+  	""
+  	},
+***************
+*** 803,826 ****
+  
+  #define UI 60		/* I */
+  	{ {
+! 	     "_",
+! 	    "| )",
+! 	",---|/",
+! 	 "\\_/ \\",
+  	"",
+  	""
+  	},
+! 	{5,4,0,1,0,0},
+! 	-1,3
+  	},
+  
+  #define UJ 61		/* J */
+  	{ {
+  	  "___",
+! 	 "(   >",
+  	  "__/",
+  	 "/ /",
+! 	"<_/",
+  	""
+  	},
+  	{2,1,2,1,0,0},
+--- 811,834 ----
+  
+  #define UI 60		/* I */
+  	{ {
+! 	  "__",
+! 	 "(  )",
+! 	   "/",
+! 	"\\_/",
+  	"",
+  	""
+  	},
+! 	{2,1,3,0,0,0},
+! 	-1,-1
+  	},
+  
+  #define UJ 61		/* J */
+  	{ {
+  	  "___",
+! 	 "(   )",
+  	  "__/",
+  	 "/ /",
+! 	"(_/",
+  	""
+  	},
+  	{2,1,2,1,0,0},
+***************
+*** 1053,1063 ****
+  	"o o",
+  	"' '",
+  	"",
+  	"",
+- 	"",
+  	""
+  	},
+! 	{0,0,0,0,0,0},
+  	-1,-1
+  	},
+  
+--- 1061,1071 ----
+  	"o o",
+  	"' '",
+  	"",
++ 	 " ",
+  	"",
+  	""
+  	},
+! 	{0,0,0,1,0,0},
+  	-1,-1
+  	},
+  
+***************
+*** 1089,1102 ****
+  
+  #define PF 82		/* ' */
+  	{ {
+! 	"o",
+! 	"'",
+  	"",
+  	"",
+- 	"",
+  	""
+  	},
+! 	{0,0,0,0,0,0},
+  	-1,-1
+  	},
+  
+--- 1097,1110 ----
+  
+  #define PF 82		/* ' */
+  	{ {
+! 	 "o",
+! 	 "'",
+  	"",
++ 	" ",
+  	"",
+  	""
+  	},
+! 	{1,1,0,0,0,0},
+  	-1,-1
+  	},
+  
+***************
+*** 1118,1128 ****
+  	"",
+  	"",
+  	"---",
+  	"",
+- 	"",
+  	""
+  	},
+! 	{0,0,0,0,0,0},
+  	-1,-1
+  	},
+  
+--- 1126,1136 ----
+  	"",
+  	"",
+  	"---",
++ 	 " ",
+  	"",
+  	""
+  	},
+! 	{0,0,0,1,0,0},
+  	-1,-1
+  	},
+  
+***************
+*** 1180,1193 ****
+  
+  #define PB 89		/* ` */
+  	{ {
+! 	"o",
+! 	"`",
+  	"",
+  	"",
+- 	"",
+  	""
+  	},
+! 	{0,0,0,0,0,0},
+  	-1,-1
+  	}
+  	};
+--- 1188,1201 ----
+  
+  #define PB 89		/* ` */
+  	{ {
+! 	  "o",
+! 	  "`",
+  	"",
++ 	" ",
+  	"",
+  	""
+  	},
+! 	{2,2,0,0,0,0},
+  	-1,-1
+  	}
+  	};
+
+From tadpole@MATH.UCLA.EDU Tue Dec  8 20:52:13 1987
+Received: from julia.MATH.UCLA.EDU (128.97.64.3) by crim.eecs.umich.edu (3.2/umich-5.1)
+	id AA14529; Tue, 8 Dec 87 20:51:45 EST
+Received: by julia.MATH.UCLA.EDU (Sendmail 5.51/5.14)
+	id AA19121; Tue, 8 Dec 87 17:51:28 PST
+Date: Tue, 8 Dec 87 17:51:28 PST
+From: really just tad <tadpole@MATH.UCLA.EDU>
+Message-Id: <8712090151.AA19121@julia.MATH.UCLA.EDU>
+To: janc@crim.eecs.umich.edu
+Subject: cursive
+Status: R
+
+is wonderful to behold in action. It does not seem to handle apostrophes
+correctly; an apostrophe appears only at the beginning of a word or after
+a letter which extends as high as an apostrophe would. Probably easy to
+fix. Please update me if you make any improvements...
+
+				Thanks -- Tad White
+
+From don%dons3b1%novavax%codas%moss.uucp@RUTGERS.EDU Sun Jan  3 01:22:23 1988
+Received: from RUTGERS.EDU by crim.eecs.umich.edu (3.2/umich-5.1)
+	id AA16774; Sun, 3 Jan 88 01:22:15 EST
+Received: by RUTGERS.EDU (5.54/1.15) with UUCP 
+	id AA04864; Sun, 3 Jan 88 01:28:13 EST
+Received: by codas.att.com (smail2.5)
+	id AA26939; 2 Jan 88 11:54:52 EST (Sat)
+Received: by novavax.UUCP (4.12/smail2.3/03-15-87)
+	id AA16247; Sat, 2 Jan 88 11:45:19 est
+Message-Id: <8801021645.AA16247@novavax.UUCP>
+To: janc%novavax.uucp@crim.eecs.umich.edu
+Date: Sat, 2 Jan 88 11:44:01 EST
+From: Don Joslyn <don%dons3b1.uucp@RUTGERS.EDU>
+Subject: cursive
+X-Mailer: Elm [version 1.5b]
+Status: R
+
+Hi Jan,
+
+	Just wanted to let you know that I really like your cursive program.
+
+	Thanks :-)
+
+ _    ,                      _ __              _    ,
+' )  /                      ' )  )            ' )  /
+ /--/ __.  _   _   __  ,     /  / _  , , ,     /  / _  __.  __
+/  (_(_/|_/_)_/_)_/ (_/_    /  (_</_(_(_/_    (__/_</_(_/|_/ (_
+         /   /       /                         //
+        '   '       '                         (/
+--
+Don Joslyn
+Cooper City, FL 33330
+UUCP:  ...{ihnp4!codas,ucf-cs,allegra}!novavax!dons3b1!don
+
+
+From megabyte%chinet.uucp%nucsrl%gargoyle%oddjob%mimsy.uucp@uunet.UU.NET Sat Jan  2 23:07:57 1988
+Received: from uunet.UU.NET by crim.eecs.umich.edu (3.2/umich-5.1)
+	id AA16598; Sat, 2 Jan 88 23:07:35 EST
+Received: from mimsy.umd.edu by uunet.UU.NET (5.54/1.14) 
+	id AA06939; Sat, 2 Jan 88 23:07:42 EST
+Received: by mimsy.umd.edu (5.58/4.7)
+	id AA09034; Sat, 2 Jan 88 23:07:58 EST
+Received: by oddjob.uchicago.edu Sat, 2 Jan 88 20:54:42 CST
+Received: by gargoyle.uchicago.edu (5.54/1.14)
+	id AA08395; Sat, 2 Jan 88 20:41:55 CST
+Received: from chinet by gamma.nucsrl.uucp id aa06362; 2 Jan 88 20:43 CST
+Received: by chinet.UUCP (smail2.5)
+	id AA15463; 2 Jan 88 15:29:51 CST (Sat)
+Subject: Cursive Can I have font.c
+To: janc@crim.eecs.umich.edu
+Date: Sat, 2 Jan 88 15:29:49 CST
+X-Mailer: Elm [version 1.7]
+Message-Id: <8801021529.AA15463@chinet.UUCP>
+From: "Dr. Megabyte" <megabyte%chinet%gargoyle%oddjob%mimsy.uucp@uunet.UU.NET>
+Status: R
+
+Jan,
+  I'm trying to port your cursive program to a non Unix
+operating system, OS9.  I lost my copy of font.c  Could
+you email it to me here at chinet?
+---
+UUCP:	(1) ??????????????!scsnet!sunder		Mark E. Sunderlin
+	(2) ihnp4!chinet!megabyte			aka Dr. Megabyte
+CIS:	74026,3235					(202) 634-2529
+Mail:	IRS  PFR:D:NO  1111 Constitution Ave. NW  Washington,DC 20224  
+
+From brandy%mills.Berkeley.EDU@jade.berkeley.edu Fri Apr 22 18:14:02 1988
+Received: from jade.berkeley.edu by crim.eecs.umich.edu (3.2/umich-5.2)
+	id AA07903; Fri, 22 Apr 88 18:13:49 EDT
+Received: from mills.berkeley.edu
+	by jade.berkeley.edu (5.54 (CFC 4.22.3)/1.16.18B)
+	id AA29639; Fri, 22 Apr 88 15:12:47 PDT
+Received: by mills.berkeley.edu (5.51/SMI-3.0DEV3.6)
+	id AA15474; Fri, 22 Apr 88 15:13:58 PDT
+Date: Fri, 22 Apr 88 15:13:58 PDT
+From: brandy%mills.Berkeley.EDU@jade.berkeley.edu (                        )
+Message-Id: <8804222213.AA15474@mills.berkeley.edu>
+To: janc@crim.eecs.umich.edu
+Subject: cursive program.
+Status: R
+
+
+i just wanted to tell you that
+i think your cursive program is
+really great!
+
+brandy
+mills college,
+oakland, calif.
+

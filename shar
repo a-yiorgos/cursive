@@ -1,0 +1,28 @@
+#!/bin/sh
+# My own crummy shar archive builder.  This is an sh script.
+#
+# Jan Wolter
+#
+echo "# To unpack this file, run 'sh <filename>'"
+echo "#"
+echo "# This archive contains:"
+echo "#" $*
+echo "#"
+#
+# Insert a test to make sure TABS are still TABS
+#
+echo 'if (test `echo "		" | wc -c` -gt 3) then'
+echo "	echo WARNING: Tabs may have been expanded to spaces in shar file."
+echo "	echo          This may cause errors in Makefiles and programs."
+echo "	echo          Use of 'unexpand' *may* be sufficient to fix this."
+echo "fi"
+#
+# Put in all the files.
+#
+for i do
+	echo "echo 'x -" $i"'"
+	echo "sed 's/^|//' >" $i "<<'%AND%SHAR%ALIKE%'"
+	sed 's/^/|/' < $i
+	echo '%AND%SHAR%ALIKE%'
+done
+echo "exit 0"
