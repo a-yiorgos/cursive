@@ -1,13 +1,16 @@
 CFLAGS = -g
 
-cursive: cursive.o x.o xs.o
+cursive: xstr cursive.o x.o xs.o
 	cc -g -o cursive cursive.o x.o xs.o
 
+xstr: xstr.c
+	cc -o xstr xstr.c
+
 x.c: font.c
-	xstr font.c
+	./xstr font.c
 
 xs.c: font.c
-	xstr font.c
+	./xstr font.c
 
 # This is for use if you haven't got the xstr command.  The program works
 # the same, but is slightly bigger.
