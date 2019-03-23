@@ -15,6 +15,8 @@ connecting line between two letters.
 and symbols.  Punctuation is mostly available.  Some characters are
 rather ugly.  The author has lousy handwriting.
 
+(Cursive and the font it generates are copyrighted by Jan Wolter)
+
 The initial commit of this repository comes from the cursive code as
 found at: ftp://puck.nether.net/pub/janc/cursive.tgz
 
