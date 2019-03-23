@@ -75,69 +75,16 @@ int taillen = 1;	/* how long the tails on ends of words should be */
 char firstletter;	/* is this the first letter on the line? */
 char message[256] = "";	/* message to print */
 
-void prline();
-void tailer();
-
+/* Lengthen the last trailer by n */
 void
-main(argc,argv)
-int argc;
-char **argv;
+tailer(n)
+int n;
 {
-int i;
-char *s,*m;
-char ch;
-
-	m = message;
-	for (i = 1; i < argc; i++)
-	{
-		if (*argv[i] == '-')
-			switch(ch = argv[i][1])
-			{
-			case 'i':
-			case 't':
-				s = argv[i]+2;
-				if (*s == '\000')
-					if (++i < argc)
-						s = argv[i];
-				if (*s < '0' || *s > '9')
-				{
-					printf("%s: Illegal value %s\n",
-						argv[0],s);
-					exit(1);
-				}
-				if (ch == 'i')
-					interspace = atoi(s);
-				else
-					taillen = atoi(s);
-				break;
-			default:
-				printf("usage: %s [-tn] [-in] message\n",
-					argv[0]);
-				exit(1);
-			}
-		else
-		{
-			if (m != message)
-				*(m++) = ' ';
-			for (s=argv[i]; *s != '\000'; s++)
-				*(m++) = *s;
-		}
-	}
-	/* Do the deed */
-	if (m != message)
-	{
-		/* Message from the arg list */
-		*(m++) = 0;
-		prline(message);
-	}
-	else
-	{
-		/* Message from standard input */
-		while (fgets(message, 256, stdin) != NULL)
-			prline(message);
-	}
+int j;
+	if (lasttail >= 0)
+		for (j = 0; j < n; j++)
+			buffer[lasttail][c[lasttail]++] = '_';
 }
-
 
 /* Add the given letter to the end of the current line */
 
@@ -203,17 +150,6 @@ char *l;
 	space = 0;
 }
 
-/* Lengthen the last trailer by n */
-void
-tailer(n)
-int n;
-{
-int j;
-	if (lasttail >= 0)
-		for (j = 0; j < n; j++)
-			buffer[lasttail][c[lasttail]++] = '_';
-}
-
 /* Handle a line */
 void
 prline(s)
@@ -271,3 +207,64 @@ short lcode;
 		free(buffer[i]);
 	}
 }
+
+void
+main(argc,argv)
+int argc;
+char **argv;
+{
+int i;
+char *s,*m;
+char ch;
+
+	m = message;
+	for (i = 1; i < argc; i++)
+	{
+		if (*argv[i] == '-')
+			switch(ch = argv[i][1])
+			{
+			case 'i':
+			case 't':
+				s = argv[i]+2;
+				if (*s == '\000')
+					if (++i < argc)
+						s = argv[i];
+				if (*s < '0' || *s > '9')
+				{
+					printf("%s: Illegal value %s\n",
+						argv[0],s);
+					exit(1);
+				}
+				if (ch == 'i')
+					interspace = atoi(s);
+				else
+					taillen = atoi(s);
+				break;
+			default:
+				printf("usage: %s [-tn] [-in] message\n",
+					argv[0]);
+				exit(1);
+			}
+		else
+		{
+			if (m != message)
+				*(m++) = ' ';
+			for (s=argv[i]; *s != '\000'; s++)
+				*(m++) = *s;
+		}
+	}
+	/* Do the deed */
+	if (m != message)
+	{
+		/* Message from the arg list */
+		*(m++) = 0;
+		prline(message);
+	}
+	else
+	{
+		/* Message from standard input */
+		while (fgets(message, 256, stdin) != NULL)
+			prline(message);
+	}
+}
+
