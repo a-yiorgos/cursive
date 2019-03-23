@@ -11,13 +11,13 @@ The default is -t1 .  The '\_' character is treated in a special way.
 It may be  inserted  in the  text  anywhere  you wish to lengthen a
 connecting line between two letters.
 
-**BUGS** Many ASCII characters are not defined, notably the numbers
+**BUGS:** Many ASCII characters are not defined, notably the numbers
 and symbols.  Punctuation is mostly available.  Some characters are
 rather ugly.  The author has lousy handwriting.
 
 (Cursive and the font it generates are copyrighted by Jan Wolter)
 
 The initial commit of this repository comes from the cursive code as
-found at: ftp://puck.nether.net/pub/janc/cursive.tgz
+found [here](ftp://puck.nether.net/pub/janc/cursive.tgz).
 
 This archive was created because of [this comment](https://lobste.rs/s/djefzo/figlet#c_sql00s).
