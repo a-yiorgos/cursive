@@ -18,6 +18,6 @@ rather ugly.  The author has lousy handwriting.
 (Cursive and the font it generates are copyrighted by Jan Wolter)
 
 The initial commit of this repository comes from the cursive code as
-found [here](ftp://puck.nether.net/pub/janc/cursive.tgz).
+found here: ftp://puck.nether.net/pub/janc/cursive.tgz
 
 This archive was created because of [this comment](https://lobste.rs/s/djefzo/figlet#c_sql00s).
